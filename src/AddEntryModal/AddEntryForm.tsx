@@ -1,9 +1,10 @@
 import React from "react";
 import { Formik, Field } from "formik";
-import { HealthCheckRating, EntryType, NewHospitalEntry, NewOccupationalHealthCareEntry, NewEntry } from "../types";
+import { HealthCheckRating, EntryType, NewEntry } from "../types";
 import { Form, Grid, Button } from "semantic-ui-react";
 import { SelectField, TextField, DiagnosisSelection, NumberField } from "../AddPatientModal/FormField";
 import { useStateValue } from "../state";
+import { EntryFormValidation } from "../utils/formValidation";
 
 const typeOptions = [
   { label: "Hospital", value: EntryType.Hospital},
@@ -38,39 +39,7 @@ const AddEntryForm: React.FC<Props> = ({ onSubmit, onCancel }) => {
         }
       }}
       onSubmit={onSubmit}
-      validate={values => {
-        const requiredError = "Field is required";
-        const errors: { [field: string]: string } = {};
-        if (!values.description) {
-          errors.description = requiredError;
-        }
-        if (!values.date) {
-          errors.date = requiredError;
-        }
-        if (!values.specialist) {
-          errors.specialist = requiredError;
-        }
-        switch(values.type) {
-          case EntryType.Hospital:
-            if (!(values as NewHospitalEntry).discharge.date) {
-              errors["discharge.date"] = requiredError;
-            }
-            if (!(values as NewHospitalEntry).discharge.criteria) {
-              errors["discharge.date"] = requiredError;
-            }
-            break;
-          case EntryType.HealthCheck:
-            break;
-          case EntryType.OccupationalHealthcare:
-            if (!(values as NewOccupationalHealthCareEntry).employerName) {
-              errors.employerName = requiredError;
-            }
-            break;
-          default:
-            throw new Error(`Unhandled type on entry form: ${values.type}`);
-        }
-        return errors;
-      }}
+      validate={values => EntryFormValidation(values)}
     >
       {({ isValid, dirty, values, isSubmitting, handleSubmit, setFieldValue, setFieldTouched }) => {
         return (
